@@ -2,7 +2,7 @@
     "name": "guzaba-platform/crud",
     "type": "guzaba-platform-component",
     "description": "GuzabaPlatform CRUD component",
-    "keywords": ["request caching"],
+    "keywords": ["crud"],
     "homepage": "https://github.com/AzonMedia/component-crud",
     "license": "BSD-3-Clause",
     "minimum-stability": "dev",
