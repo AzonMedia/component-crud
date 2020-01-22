@@ -2,7 +2,7 @@
     <div class="crud">
         <div class="content">
             <div id="data" class="tab">
-                <h3 v-if="selectedClassNameShort!=''"> {{selectedClassNameShort}} crud operations <b-button variant="success" @click="showModal('post', newObject)" size="sm">Create New</b-button> </h3>
+                <h3 v-if="selectedClassName!=''">Class "{{selectedClassName}}" crud operations <b-button variant="success" @click="showModal('post', newObject)" size="sm">Create New</b-button> </h3>
 
                 <template v-if="!selectedClassName">
                     <p>No class selected!</p>
@@ -10,7 +10,7 @@
 
                 <template v-else>
                     <b-form @submit="submitSearch">
-                        <b-table striped show-empty :items="items" :fields="fields" empty-text="No records found 2!" @row-clicked="rowClickHandler" no-local-sorting @sort-changed="sortingChanged" head-variant="dark" table-hover>
+                        <b-table striped show-empty :items="items" :fields="fields" empty-text="No records found!" @row-clicked="rowClickHandler" no-local-sorting @sort-changed="sortingChanged" head-variant="dark" table-hover>
 
                             <template slot="top-row" slot-scope="{ fields }">
                                 <td v-for="field in fields">
@@ -85,6 +85,7 @@
                     </template>
                 </b-modal>
 
+
                 <b-modal
                         id="crud-permissions"
                         :title="title_permissions"
@@ -132,6 +133,7 @@
 
                     </b-table>
                 </b-modal>
+
             </div>
         </div>
     </div>
@@ -238,17 +240,17 @@
 
             getClassObjects(className) {
 
-                className = className.split('\\').join('-');
+
 
                 this.fields = [];
                 this.newObject = {};
-
-                className = className.split('\\').join('.');
 
                 if (this.selectedClassName != className) {
                     this.resetParams(className);
                     this.searchValues = {};
                 }
+
+                className = className.split('\\').join('-');
 
                 for (var key in this.searchValues) {
                     if (this.searchValues[key] == '') {
@@ -261,7 +263,8 @@
 
                 var self = this;
 
-                this.$http.get('/admin/crud-objects/' + this.selectedClassName + '/' + self.currentPage + '/' + self.limit + '/'+ searchValuesToPass + '/' + this.sortBy + '/' + this.sortDesc)
+                //this.$http.get('/admin/crud-objects/' + this.selectedClassName + '/' + self.currentPage + '/' + self.limit + '/'+ searchValuesToPass + '/' + this.sortBy + '/' + this.sortDesc)
+                this.$http.get('/admin/crud-objects/' + className + '/' + self.currentPage + '/' + self.limit + '/'+ searchValuesToPass + '/' + this.sortBy + '/' + this.sortDesc)
                     .then(resp => {
 
                         for (var i in resp.data.properties) {
@@ -301,7 +304,7 @@
                 this.currentPage = 1;
                 this.totalItems = 0;
                 this.selectedClassName = className;
-                this.selectedClassNameShort = className.split(".").pop();
+                this.selectedClassNameShort = className.split("-").pop();
                 this.sortBy = 'none';
             },
 
@@ -335,7 +338,8 @@
                         this.modalTitle = 'Edit object';
                         this.modalVariant = 'success';
                         this.ButtonVariant = 'success';
-                        this.actionTitle = this.selectedClassNameShort + ":";
+                        //this.actionTitle = this.selectedClassNameShort + ":";
+                        this.actionTitle = this.selectedClassName + ":";
                         this.ButtonTitle = 'Save';
                         break;
 
@@ -343,7 +347,8 @@
                         this.modalTitle = 'Create new object';
                         this.modalVariant = 'success';
                         this.ButtonVariant = 'success';
-                        this.actionTitle = this.selectedClassNameShort + ":";
+                        //this.actionTitle = this.selectedClassNameShort + ":";
+                        this.actionTitle = this.selectedClassName + ":";
                         this.ButtonTitle = 'Save';
                         break;
                 }
@@ -368,31 +373,41 @@
                     this.actionState = true
                     this.loadingState = true
 
-                    var self = this;
-                    var sendValues = {};
+                    let self = this;
+                    let sendValues = {};
+
+                    let url = '/admin/crud-operations';
 
                     switch(this.action) {
                         case 'delete' :
                             self.loadingMessage = 'Deleting object with uuid: ' + this.crudObjectUuid;
-                            var url = this.selectedClassNameShort.toLowerCase() + '/' + this.crudObjectUuid;
+                            //url += this.selectedClassName.toLowerCase() + '/' + this.crudObjectUuid;
+                            //url += this.selectedClassName.split('\\').join('-') + '/' + this.crudObjectUuid;
+                            url += '/' + this.crudObjectUuid;
+
                             break;
 
                         case 'put' :
                             self.loadingMessage = 'Saving object with uuid: ' + this.crudObjectUuid;
-                            var url = this.selectedClassNameShort.toLowerCase() + '/' + this.crudObjectUuid;
+                            //url += this.selectedClassName.toLowerCase() + '/' + this.crudObjectUuid;
+                            //url += this.selectedClassName.split('\\').join('-') + '/' + this.crudObjectUuid;
+                            url += '/' + this.crudObjectUuid;
 
                             sendValues = this.putValues;
+
                             delete sendValues['meta_object_uuid'];
                             break;
 
                         case 'post' :
                             self.loadingMessage = 'Saving new object';
-                            var url = this.selectedClassNameShort.toLowerCase();
+                            //url += this.selectedClassName.toLowerCase();
+                            //url += this.selectedClassName.split('\\').join('-');
 
                             sendValues = this.putValues;
                             delete sendValues['meta_object_uuid'];
                             break;
                     }
+                    sendValues.crud_class_name = this.selectedClassName.split('\\').join('-');
 
                     this.$http({
                         method: this.action,
@@ -405,8 +420,11 @@
                             self.getClassObjects(self.selectedClassName)
                         })
                         .catch(err => {
-                            console.log(err);
-                            self.requestError = err;
+                            if (err.response.data.message) {
+                                self.requestError = err.response.data.message;
+                            } else {
+                                self.requestError = err;
+                            }
                         })
                         .finally(function(){
                             self.loadingState = false
@@ -498,7 +516,7 @@
                 }
             },
             $route (to, from) { // needed because by default no class is loaded and when it is loaded the component for the two routes is the same.
-                this.selectedClassName = this.$route.params.class;
+                this.selectedClassName = this.$route.params.class.split('-').join('\\');
                 //console.log("ASD " + this.selectedClassName)
                 this.getClassObjects(this.selectedClassName);
 
@@ -508,10 +526,14 @@
             //console.log('wwww');
             //console.log('params: ' + this.$route.params.class)
             //this.getClassObjects(this.contentArgs.selectedClassName.split('\\').join('.'));
-            this.selectedClassName = this.$route.params.class.split('-').join('\\');
-            if (this.selectedClassName) {
-                this.getClassObjects(this.selectedClassName);
+            //console.log(this.$route.params);
+            if (this.$route.params.class) {
+                this.selectedClassName = this.$route.params.class.split('-').join('\\');
+                if (this.selectedClassName) {
+                    this.getClassObjects(this.selectedClassName);
+                }
             }
+
 
         },
     };
