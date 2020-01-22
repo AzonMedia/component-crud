@@ -56,12 +56,23 @@ class Component extends BaseComponent implements ComponentInterface, ComponentIn
      */
     public static function register_routes() : void
     {
-        $meta = [
-            'in_navigation' => TRUE, //to be shown in the admin navigation
-            'additional_template' => '@GuzabaPlatform.Crud/NavigationHook.vue',//here the list of classes will be expanded
-        ];
         $FrontendRouter = self::get_service('FrontendRouter');
-        $FrontendRouter->add_route('/admin/crud', '@GuzabaPlatform.Crud/Admin.vue' ,'CRUD', $meta);
+        $additional = [
+            'name'  => 'CRUD',
+            'meta' => [
+                'in_navigation' => TRUE, //to be shown in the admin navigation
+                'additional_template' => '@GuzabaPlatform.Crud/NavigationHook.vue',//here the list of classes will be expanded
+            ],
+        ];
+        $FrontendRouter->{'/admin'}->add('crud', '@GuzabaPlatform.Crud/Crud.vue' ,$additional);
+
+        $additional = [
+            'name'  => 'CRUD Class',
+            'meta' => [
+                'additional_template' => '@GuzabaPlatform.Crud/NavigationHook.vue',//here the list of classes will be expanded
+            ],
+        ];
+        $FrontendRouter->{'/admin'}->add('crud/:class', '@GuzabaPlatform.Crud/Crud.vue', $additional);
     }
 
 }
