@@ -442,7 +442,7 @@
 
                 var self = this;
 
-                this.$http.get('/permissions-objects/' + this.selectedClassName + '/' + row.meta_object_uuid)
+                this.$http.get('/admin/permissions-objects/' + this.selectedClassName.split('\\').join('-') + '/' + row.meta_object_uuid)
                     .then(resp => {
                         self.items_permissions = Object.values(resp.data.items);
                     })
