@@ -451,15 +451,15 @@
                         self.requestError = err;
                         self.items_permissions = [];
                     }).finally(function(){
-                    self.$bvModal.show('crud-permissions');
-                });
+                        self.$bvModal.show('crud-permissions');
+                    });
 
             },
 
             tooglePermission(row, action){
                 this.isBusy_permission = true;
 
-                var sendValues = {};
+                let sendValues = {};
 
                 if (row[action + '_granted']) {
                     var object_uuid = row[action + '_granted'];
@@ -485,13 +485,13 @@
                     url: url,
                     data: this.$stringify(sendValues)
                 })
-                    .catch(err => {
-                        console.log(err);
-                    })
-                    .finally(function(){
-                        self.showPermissions(self.selectedObject)
-                        self.isBusy_permission = false;
-                    });
+                .catch(err => {
+                    console.log(err);
+                })
+                .finally(function(){
+                    self.showPermissions(self.selectedObject)
+                    self.isBusy_permission = false;
+                });
             },
 
             sortingChanged(ctx) {

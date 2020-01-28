@@ -49,7 +49,8 @@ class Crud extends BaseController
      */
     public function classes(): ResponseInterface
     {
-        $struct['classes'] = \GuzabaPlatform\Platform\Crud\Models\Crud::get_tree();
+        //$struct['classes'] = \GuzabaPlatform\Platform\Crud\Models\Crud::get_tree();
+        $struct['classes'] = \GuzabaPlatform\Crud\Models\Crud::get_tree();
         $Response = parent::get_structured_ok_response($struct);
         return $Response;
     }
@@ -60,7 +61,7 @@ class Crud extends BaseController
      * @param int $limit
      * @param string $search_values: url encoded, base64 encoded, JSON.stringified array
      * @param string $sort_by: column name
-     * @param string $sort_desc: true / false; if true => sort DESC
+     * @param string $sort_desc: "true" / "false"; if true => sort DESC
      */
     public function objects(string $class_name, int $page, int $limit, string $search_values, string $sort_by, string $sort_desc): ResponseInterface
     {
