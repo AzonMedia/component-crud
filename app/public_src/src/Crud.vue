@@ -107,29 +107,37 @@
                             :busy.sync="isBusy_permissions"
                     >
 
+                        <!-- permision_uuid is just a value that can not be used here as it is only for the first row/role -->
+                        <template v-slot:[setSlotCell(action_name)]="row" v-for="(permission_uuid, action_name) in items_permissions[0].permissions">
+                            <b-form-checkbox :value="row.item.permissions[action_name] ? row.item.permissions[action_name] : 0" unchecked-value="" @change="togglePermission(row.item, action_name, row.item.permissions[action_name] ? 1 : 0)" v-model="row.item.permissions[action_name]"></b-form-checkbox>
+                        </template>
+
+
+                        <!--
                         <template v-slot:cell(create_granted)="row">
-                            <b-form-checkbox :value="row.item.create_granted" :unchecked-value="0" @change="tooglePermission(row.item, 'create')" v-model="row.item.create_granted"></b-form-checkbox>
+                            <b-form-checkbox :value="row.item.create_granted" :unchecked-value="0" @change="togglePermission(row.item, 'create')" v-model="row.item.create_granted"></b-form-checkbox>
                         </template>
 
                         <template v-slot:cell(read_granted)="row">
-                            <b-form-checkbox :value="row.item.read_granted" :unchecked-value="0" @change="tooglePermission(row.item, 'read')" v-model="row.item.read_granted"></b-form-checkbox>
+                            <b-form-checkbox :value="row.item.read_granted" :unchecked-value="0" @change="togglePermission(row.item, 'read')" v-model="row.item.read_granted"></b-form-checkbox>
                         </template>
 
                         <template v-slot:cell(write_granted)="row">
-                            <b-form-checkbox :value="row.item.write_granted" :unchecked-value="0" @change="tooglePermission(row.item, 'write')" v-model="row.item.write_granted"></b-form-checkbox>
+                            <b-form-checkbox :value="row.item.write_granted" :unchecked-value="0" @change="togglePermission(row.item, 'write')" v-model="row.item.write_granted"></b-form-checkbox>
                         </template>
 
                         <template v-slot:cell(delete_granted)="row">
-                            <b-form-checkbox :value="row.item.delete_granted" :unchecked-value="0" @change="tooglePermission(row.item, 'delete')" v-model="row.item.delete_granted"></b-form-checkbox>
+                            <b-form-checkbox :value="row.item.delete_granted" :unchecked-value="0" @change="togglePermission(row.item, 'delete')" v-model="row.item.delete_granted"></b-form-checkbox>
                         </template>
 
                         <template v-slot:cell(grant_permission_granted)="row">
-                            <b-form-checkbox :value="row.item.grant_permission_granted" :unchecked-value="0" @change="tooglePermission(row.item, 'grant_permission')" v-model="row.item.grant_permission_granted"></b-form-checkbox>
+                            <b-form-checkbox :value="row.item.grant_permission_granted" :unchecked-value="0" @change="togglePermission(row.item, 'grant_permission')" v-model="row.item.grant_permission_granted"></b-form-checkbox>
                         </template>
 
                         <template v-slot:cell(revoke_permission_granted)="row">
-                            <b-form-checkbox :value="row.item.revoke_permission_granted" :unchecked-value="0" @change="tooglePermission(row.item, 'revoke_permission')" v-model="row.item.revoke_permission_granted"></b-form-checkbox>
+                            <b-form-checkbox :value="row.item.revoke_permission_granted" :unchecked-value="0" @change="togglePermission(row.item, 'revoke_permission')" v-model="row.item.revoke_permission_granted"></b-form-checkbox>
                         </template>
+                        -->
 
                     </b-table>
                 </b-modal>
@@ -150,6 +158,7 @@
         },
         data() {
             return {
+                checkbox_test: '0',
                 limit: 10,
                 currentPage: 1,
                 totalItems: 0,
@@ -182,7 +191,27 @@
                 items: [],
                 fields: [],
 
-                items_permissions:[],
+                items_permissions: [
+                    //must have a default even empty value to avoid the error on template load
+                    {
+                        permissions: [],
+                    }
+                ],
+                fields_permissions: [],
+                fields_permissions_base: [
+                    {
+                        key: 'role_id',
+                        label: 'Role ID',
+                        sortable: true
+                    },
+                    {
+                        key: 'role_name',
+                        label: 'Role Name',
+                        sortable: true
+                    },
+                ],
+
+                /*
                 fields_permissions:[
                     {
                         key: 'role_id',
@@ -225,6 +254,7 @@
                         sortable: true,
                     }
                 ],
+                */
                 title_permissions: "Permissions",
                 isBusy_permissions: false,
                 selectedObject: {},
@@ -233,6 +263,11 @@
             }
         },
         methods: {
+            // https://stackoverflow.com/questions/58140842/vue-and-bootstrap-vue-dynamically-use-slots
+            setSlotCell(action_name) {
+                return `cell(${action_name})`;
+            },
+
             submitSearch(evt){
                 evt.preventDefault()
                 this.search()
@@ -258,7 +293,7 @@
                     }
                 }
 
-                let objJsonStr = JSON.stringify(this.searchValues);
+                let objJsonStr = JSON.stringify(this.searchValues);//this is passed as GET so needs to be stringified
                 var searchValuesToPass = encodeURIComponent(window.btoa(objJsonStr));
 
                 var self = this;
@@ -412,7 +447,8 @@
                     this.$http({
                         method: this.action,
                         url: url,
-                        data: this.$stringify(sendValues)
+                        //data: this.$stringify(sendValues)
+                        data: sendValues
                     })
                         .then(resp => {
                             self.requestError = '';
@@ -437,14 +473,19 @@
 
             showPermissions(row) {
                 this.title_permissions = "Permissions for object of class \"" + row.meta_class_name + "\" with id: " + row.meta_object_id + ", object_uuid: " + row.meta_object_uuid;
-
                 this.selectedObject = row;
-
                 var self = this;
-
                 this.$http.get('/admin/permissions-objects/' + this.selectedClassName.split('\\').join('-') + '/' + row.meta_object_uuid)
                     .then(resp => {
                         self.items_permissions = Object.values(resp.data.items);
+                        self.fields_permissions = self.fields_permissions_base;//reset the columns
+                        for (let action_name in self.items_permissions[0].permissions) {
+                            self.fields_permissions.push({
+                                key: action_name,
+                                label: action_name,
+                                sortable: true,
+                            });
+                        }
                     })
                     .catch(err => {
                         console.log(err);
@@ -456,13 +497,15 @@
 
             },
 
-            tooglePermission(row, action){
+            togglePermission(row, action, checked){
                 this.isBusy_permission = true;
 
-                let sendValues = {};
+                let sendValues = {}
 
-                if (row[action + '_granted']) {
-                    var object_uuid = row[action + '_granted'];
+                if (checked) {
+                //if (typeof row.permissions[action] != "undefined") {
+                    //var object_uuid = row[action + '_granted'];
+                    let object_uuid = row.permissions[action];
 
                     this.action = "delete";
 
@@ -478,16 +521,38 @@
                     sendValues.class_name = this.selectedClassName.split(".").join("\\");
                 }
 
+
                 var self = this;
 
                 this.$http({
                     method: this.action,
                     url: url,
-                    data: this.$stringify(sendValues)
+                    //data: this.$stringify(sendValues)
+                    data: sendValues
                 })
-                .catch(err => {
-                    console.log(err);
-                })
+                    .then(resp => {
+                        this.$bvToast.toast(resp.data.message, {
+                            // title: '',
+                            autoHideDelay: 5000,
+                            variant: 'info',
+                            appendToast: true,
+                            solid: true,
+                            noCloseButton: true
+                        })
+                    })
+                    .catch(err => {
+                        console.log(err);
+                        this.$bvToast.toast(err.response.data.message, {
+                            // title: '',
+                            autoHideDelay: 5000,
+                            variant: 'info',
+                            appendToast: true,
+                            solid: true,
+                            noCloseButton: true
+                        })
+                        //self.requestError = err;
+
+                    })
                 .finally(function(){
                     self.showPermissions(self.selectedObject)
                     self.isBusy_permission = false;

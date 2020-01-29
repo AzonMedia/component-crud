@@ -23,9 +23,9 @@ class Permissions extends BaseController
 //            '/admin/permissions-controllers' => [
 //                Method::HTTP_GET_HEAD_OPT => [self::class, 'controllers']
 //            ],
-            '/admin/permissions-users/{method_name}' => [
-                Method::HTTP_GET_HEAD_OPT => [self::class, 'permissions']
-            ],
+//            '/admin/permissions-users/{method_name}' => [
+//                Method::HTTP_GET_HEAD_OPT => [self::class, 'permissions']
+//            ],
             '/admin/permissions-objects/{class_name}/{object_uuid}' => [
                 Method::HTTP_GET_HEAD_OPT => [self::class, 'permissions_object']
             ],
