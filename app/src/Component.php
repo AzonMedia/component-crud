@@ -61,18 +61,18 @@ class Component extends BaseComponent implements ComponentInterface, ComponentIn
             'name'  => 'CRUD',
             'meta' => [
                 'in_navigation' => TRUE, //to be shown in the admin navigation
-                'additional_template' => '@GuzabaPlatform.Crud/NavigationHook.vue',//here the list of classes will be expanded
+                'additional_template' => '@GuzabaPlatform.Crud/CrudNavigationHook.vue',//here the list of classes will be expanded
             ],
         ];
-        $FrontendRouter->{'/admin'}->add('crud', '@GuzabaPlatform.Crud/Crud.vue' ,$additional);
+        $FrontendRouter->{'/admin'}->add('crud', '@GuzabaPlatform.Crud/CrudAdmin.vue' ,$additional);
 
         $additional = [
             'name'  => 'CRUD Class',
             'meta' => [
-                'additional_template' => '@GuzabaPlatform.Crud/NavigationHook.vue',//here the list of classes will be expanded
+                'additional_template' => '@GuzabaPlatform.Crud/CrudNavigationHook.vue',//here the list of classes will be expanded
             ],
         ];
-        $FrontendRouter->{'/admin'}->add('crud/:class', '@GuzabaPlatform.Crud/Crud.vue', $additional);
+        $FrontendRouter->{'/admin'}->add('crud/:class', '@GuzabaPlatform.Crud/CrudAdmin.vue', $additional);
     }
 
 }

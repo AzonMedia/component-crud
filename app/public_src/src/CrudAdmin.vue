@@ -14,7 +14,8 @@
 
                             <template slot="top-row" slot-scope="{ fields }">
                                 <td v-for="field in fields">
-                                    <template v-if="field.key=='meta_object_uuid'">
+                                    <!-- <template v-if="field.key=='meta_object_uuid'"> -->
+                                    <template v-if="field.key=='action'">
                                         <b-button size="sm" variant="outline-primary" type="submit" @click="search()">Search</b-button>
                                     </template>
 
@@ -24,7 +25,8 @@
                                 </td>
                             </template>
 
-                            <template v-slot:cell(meta_object_uuid)="row">
+                            <!-- <template v-slot:cell(meta_object_uuid)="row"> -->
+                            <template v-slot:cell(action)="row">
                                 <b-button size="sm" variant="outline-danger" v-on:click.stop="" @click="showModal('delete', row.item)">Delete</b-button>
 
                                 <b-button size="sm" variant="outline-success" v-on:click.stop="" @click="showPermissions( row.item)">Permissions</b-button>
@@ -301,25 +303,40 @@
                 //this.$http.get('/admin/crud-objects/' + this.selectedClassName + '/' + self.currentPage + '/' + self.limit + '/'+ searchValuesToPass + '/' + this.sortBy + '/' + this.sortDesc)
                 this.$http.get('/admin/crud-objects/' + className + '/' + self.currentPage + '/' + self.limit + '/'+ searchValuesToPass + '/' + this.sortBy + '/' + this.sortDesc)
                     .then(resp => {
-
+                        // self.fields.push({
+                        //     label: 'UUID',
+                        //     key: key,
+                        //     sortable: true
+                        // });
                         for (var i in resp.data.properties) {
-                            var key = resp.data.properties[i];
+                            let key = resp.data.properties[i];
+                            self.fields.push({
+                                key: key,
+                                sortable: true
+                            });
 
-                            if (key != 'meta_object_uuid') {
-                                self.fields.push({
-                                    key: key,
-                                    sortable: true
-                                });
+                            self.newObject[key] = '';
 
-                                self.newObject[key] = '';
-                            } else {
-                                self.fields.push({
-                                    key: key,
-                                    label: 'Action',
-                                    sortable: false
-                                });
-                            }
+                            // if (key != 'meta_object_uuid') {
+                            //     self.fields.push({
+                            //         key: key,
+                            //         sortable: true
+                            //     });
+                            //
+                            //     self.newObject[key] = '';
+                            // } else {
+                            //     self.fields.push({
+                            //         key: key,
+                            //         label: 'Action',
+                            //         sortable: false
+                            //     });
+                            // }
                         }
+                        self.fields.push({
+                            label: 'Action',
+                            key: 'action',
+                            sortable: true
+                        });
 
                         self.items = resp.data.data;
 
@@ -472,13 +489,15 @@
             },
 
             showPermissions(row) {
+                console.log(row);
                 this.title_permissions = "Permissions for object of class \"" + row.meta_class_name + "\" with id: " + row.meta_object_id + ", object_uuid: " + row.meta_object_uuid;
                 this.selectedObject = row;
                 var self = this;
                 this.$http.get('/admin/permissions-objects/' + this.selectedClassName.split('\\').join('-') + '/' + row.meta_object_uuid)
                     .then(resp => {
                         self.items_permissions = Object.values(resp.data.items);
-                        self.fields_permissions = self.fields_permissions_base;//reset the columns
+                        //self.fields_permissions = self.fields_permissions_base;//reset the columns
+                        self.fields_permissions = JSON.parse(JSON.stringify(self.fields_permissions_base)) //deep clone and produce again Array
                         for (let action_name in self.items_permissions[0].permissions) {
                             self.fields_permissions.push({
                                 key: action_name,

@@ -45,7 +45,7 @@ class Crud extends BaseController
 //    ];
 
     /**
-     * returns a list with all ActiveRecord classes
+     * Returns a list with all ActiveRecord classes
      */
     public function classes(): ResponseInterface
     {
