@@ -49,32 +49,32 @@ class Permissions extends Base
 
         $splitRE   = '/' . preg_quote($delimiter, '/') . '/';
 
-        $returnArr = array();
+        $return_arr = array();
 
         foreach ($array as $key => $val) {
             // Get parent parts and the current leaf
             $parts	= preg_split($splitRE, $key, -1, PREG_SPLIT_NO_EMPTY);
-            $leafPart = array_pop($parts);
+            $leaf_part = array_pop($parts);
 
             // Build parent structure
             // Might be slow for really deep and large structures
-            $parentArr = &$returnArr;
+            $_parent_arr = &$return_arr;
 
             foreach ($parts as $part) {
-                if (!isset($parentArr[$part])) {
-                    $parentArr[$part] = array();
-                } elseif (!is_array($parentArr[$part])) {
+                if (!isset($_parent_arr[$part])) {
+                    $_parent_arr[$part] = array();
+                } elseif (!is_array($_parent_arr[$part])) {
                     if ($baseval) {
-                        $parentArr[$part] = array('__base_val' => $parentArr[$part]);
+                        $_parent_arr[$part] = array('__base_val' => $_parent_arr[$part]);
                     } else {
-                        $parentArr[$part] = array();
+                        $_parent_arr[$part] = array();
                     }
                 }
-                $parentArr = &$parentArr[$part];
+                $_parent_arr = &$_parent_arr[$part];
             }
 
             // Add the final part to the structure
-            if (empty($parentArr[$leafPart])) {
+            if (empty($_parent_arr[$leaf_part])) {
                 $RClass = new ReflectionClass($val);
 
                 $methods_arr = [];
@@ -95,12 +95,12 @@ class Permissions extends Base
                     ], $methods_arr);
                 }
 
-                $parentArr[$leafPart] = $methods_arr;
-            } elseif ($baseval && is_array($parentArr[$leafPart])) {
-                $parentArr[$leafPart]['__base_val'] = $val;
+                $_parent_arr[$leaf_part] = $methods_arr;
+            } elseif ($baseval && is_array($_parent_arr[$leaf_part])) {
+                $_parent_arr[$leaf_part]['__base_val'] = $val;
             }
         }
-        return $returnArr;
+        return $return_arr;
     }
 
 //    /**

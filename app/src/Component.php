@@ -8,7 +8,6 @@ use Guzaba2\Base\Base;
 use Guzaba2\Mvc\Controller;
 use GuzabaPlatform\Components\Base\Interfaces\ComponentInitializationInterface;
 use GuzabaPlatform\Components\Base\Interfaces\ComponentInterface;
-use GuzabaPlatform\Components\Base\Traits\ComponentTrait;
 use GuzabaPlatform\Crud\Hooks\AdminEntry;
 use GuzabaPlatform\Crud\Hooks\RoutesEntry;
 use GuzabaPlatform\Platform\Admin\Controllers\Navigation;

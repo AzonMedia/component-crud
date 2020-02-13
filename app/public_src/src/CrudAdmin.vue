@@ -154,7 +154,7 @@
     import Hook from '@GuzabaPlatform.Platform/components/hooks/Hooks.vue'
     import { stringify } from 'qs'
     export default {
-        name: "Crud",
+        name: "CrudAdmin",
         components: {
             Hook
         },

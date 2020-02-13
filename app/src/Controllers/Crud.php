@@ -20,9 +20,6 @@ class Crud extends BaseController
 {
 
     protected const CONFIG_DEFAULTS = [
-        'services'      => [
-            'ConnectionFactory'
-        ],
         'routes'        => [
             '/admin/crud-classes' => [
                 Method::HTTP_GET_HEAD_OPT => [self::class, 'classes']
