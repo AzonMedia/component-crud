@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace GuzabaPlatform\Crud;
 
+use Guzaba2\Base\Exceptions\RunTimeException;
 use GuzabaPlatform\Components\Base\BaseComponent;
 use Guzaba2\Base\Base;
 use Guzaba2\Mvc\Controller;
@@ -42,6 +43,7 @@ class Component extends BaseComponent implements ComponentInterface, ComponentIn
 
     /**
      * @return array
+     * @throws RunTimeException
      */
     public static function run_all_initializations() : array
     {
@@ -51,7 +53,7 @@ class Component extends BaseComponent implements ComponentInterface, ComponentIn
 
 
     /**
-     * @throws \Guzaba2\Base\Exceptions\RunTimeException
+     * @throws RunTimeException
      */
     public static function register_routes() : void
     {

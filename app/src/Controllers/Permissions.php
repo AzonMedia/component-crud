@@ -15,6 +15,12 @@ use GuzabaPlatform\Platform\Application\MysqlConnectionCoroutine;
 use Azonmedia\Reflection\ReflectionClass;
 use GuzabaPlatform\Platform\Application\BaseController;
 
+/**
+ * Class Permissions
+ * @package GuzabaPlatform\Crud\Controllers
+ *
+ * Returns the permissions of a single object.
+ */
 class Permissions extends BaseController
 {
 
@@ -74,6 +80,10 @@ class Permissions extends BaseController
      * Returns the permissions of a given object
      * @param string $class_name
      * @param string $object_uuid
+     * @return ResponseInterface
+     * @throws RunTimeException
+     * @throws \Azonmedia\Exceptions\InvalidArgumentException
+     * @throws \ReflectionException
      */
     public function permissions_object(string $class_name, string $object_uuid): ResponseInterface
     {
@@ -86,7 +96,7 @@ class Permissions extends BaseController
 
         $ActiveRecord = new $class_name($object_uuid);
         //$struct['items'] = \GuzabaPlatform\Platform\Crud\Models\Permissions::get_permissions_by_id($class_name, $ActiveRecord->meta_object_id);
-        $struct['items'] = \GuzabaPlatform\Crud\Models\Permissions::get_permissions_by_id($class_name, $ActiveRecord->meta_object_id);
+        $struct['items'] = \GuzabaPlatform\Crud\Models\Permissions::get_permissions_by_id($class_name, $ActiveRecord->get_id());
 
         $Response = parent::get_structured_ok_response($struct);
         return $Response;

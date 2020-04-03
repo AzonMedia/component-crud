@@ -2,12 +2,18 @@
 
 namespace GuzabaPlatform\Crud\Models;
 
+use Azonmedia\Exceptions\InvalidArgumentException;
 use Guzaba2\Authorization\Acl\Permission;
+use Guzaba2\Authorization\Role;
+use Guzaba2\Authorization\User;
 use Guzaba2\Base\Base;
+use Guzaba2\Base\Exceptions\RunTimeException;
 use Guzaba2\Kernel\Kernel;
 use Guzaba2\Mvc\ActiveRecordController;
 use Guzaba2\Orm\ActiveRecord;
 use Azonmedia\Reflection\ReflectionClass;
+use Guzaba2\Orm\Store\Interfaces\StructuredStoreInterface;
+use Guzaba2\Orm\Store\Sql\Mysql;
 use GuzabaPlatform\Platform\Application\MysqlConnectionCoroutine;
 
 class Permissions extends Base
@@ -15,6 +21,7 @@ class Permissions extends Base
     protected const CONFIG_DEFAULTS = [
         'services'      => [
             'ConnectionFactory',
+            'MysqlOrmStore',
         ]
     ];
 
@@ -154,61 +161,22 @@ class Permissions extends Base
     /**
      * Returns the permissions of a specific object.
      * @param string $class_name
-     * @param string $object_id
+     * @param int $object_id
      * @return array
-     * @throws \Guzaba2\Base\Exceptions\RunTimeException
+     * @throws RunTimeException
+     * @throws InvalidArgumentException
+     * @throws \ReflectionException
      */
-    public static function get_permissions_by_id(string $class_name, string $object_id)
+    public static function get_permissions_by_id(string $class_name, int $object_id)
     {
-        $Connection = self::get_service('ConnectionFactory')->get_connection(MysqlConnectionCoroutine::class, $ScopeReference);
+        $Connection = self::get_service('ConnectionFactory')->get_connection(MysqlConnectionCoroutine::class, $CR);
+        /** @var StructuredStoreInterface $StructuredStore */
+        $StructuredStore = self::get_service('MysqlOrmStore');
 
-/*
-        $q = "
-SELECT
-    roles.*,
-    meta.meta_object_uuid,
-    acl_permissions.action_name
-FROM
-    {$Connection::get_tprefix()}roles as roles
-LEFT JOIN
-    {$Connection::get_tprefix()}acl_permissions as acl_permissions
-    ON
-        roles.role_id = acl_permissions.role_id
-    AND
-        acl_permissions.class_name = :class_name
-    AND
-        acl_permissions.object_id = :object_id
-LEFT JOIN
-    {$Connection::get_tprefix()}users as users
-    ON
-        roles.role_id = users.user_id
-LEFT JOIN
-    {$Connection::get_tprefix()}object_meta as meta
-    ON
-        meta.meta_object_id = acl_permissions.permission_id
-    AND
-        meta.meta_class_name = :meta_class_name
--- WHERE
---    (users.user_id IS NULL OR users.user_id = 1)
-ORDER BY
-    roles.role_name
-";
-
-        $data = $Connection->prepare($q)->execute(['class_name' => $class_name, 'object_id' => $object_id, 'meta_class_name' => Permission::class])->fetchAll();
-
-        $ret = [];
-        foreach ($data as $row) {
-            print_r($row);
-
-            $ret[$row['role_id']]['role_id'] = $row['role_id'];
-            $ret[$row['role_id']]['role_name'] = $row['role_name'];
-
-            if ($row['action_name']) {
-                $ret[$row['role_id']][$row['action_name'] . '_granted'] = $row['meta_object_uuid'];
-            }
-        }
-//print_r($ret);
-*/
+        $meta_table = $StructuredStore::get_meta_table();
+        $roles_table = Role::get_main_table();
+        $users_table = User::get_main_table();
+        $permissions_table = Permission::get_main_table();
 
 
         $q = "
@@ -217,32 +185,32 @@ SELECT
     meta.meta_object_uuid,
     acl_permissions.action_name
 FROM
-    {$Connection::get_tprefix()}roles as roles
-LEFT JOIN
-    {$Connection::get_tprefix()}acl_permissions as acl_permissions
-    ON
-        acl_permissions.role_id = roles.role_id
-    AND
-        acl_permissions.class_name = :class_name
-    AND
-        acl_permissions.object_id = :object_id
-LEFT JOIN
-    {$Connection::get_tprefix()}users as users
-    ON
-        users.user_id = roles.role_id
-LEFT JOIN
-    {$Connection::get_tprefix()}object_meta as meta
-    ON
-        meta.meta_object_id = acl_permissions.permission_id
-    AND
-        meta.meta_class_name = :meta_class_name
+    {$Connection::get_tprefix()}{$roles_table} as roles
+    LEFT JOIN {$Connection::get_tprefix()}{$permissions_table} as acl_permissions
+        ON
+            acl_permissions.role_id = roles.role_id
+        AND
+            acl_permissions.class_id = :class_id
+        AND
+            acl_permissions.object_id = :object_id
+    LEFT JOIN {$Connection::get_tprefix()}{$users_table} as users
+        ON
+            users.user_id = roles.role_id
+    LEFT JOIN
+        {$Connection::get_tprefix()}{$meta_table} as meta
+        ON
+            meta.meta_object_id = acl_permissions.permission_id
+        AND
+            meta.meta_class_id = :meta_class_id
 -- WHERE
 --    (users.user_id IS NULL OR users.user_id = 1)
 ORDER BY
     roles.role_name
 ";
+        //acl_permissions.class_name = :class_name
+        //meta.meta_class_name = :meta_class_name
 
-        $data = $Connection->prepare($q)->execute(['class_name' => $class_name, 'object_id' => $object_id, 'meta_class_name' => Permission::class])->fetchAll();
+        $data = $Connection->prepare($q)->execute(['class_id' => $StructuredStore->get_class_id($class_name), 'object_id' => $object_id, 'meta_class_id' => $StructuredStore->get_class_id(Permission::class) ] )->fetchAll();
 
         $ret = [];
         $object_actions = $class_name::get_object_actions();
