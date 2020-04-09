@@ -9,7 +9,7 @@
         </b-collapse>
         -->
         <!-- :contentToLoad=loadCrud" -->
-        <tree-menu class="small" v-for="(node, index) in crud" :nodes="node" :label="index" :contentToLoad="loadCrud" :depth="1"></tree-menu>
+        <tree-menu class="small" v-for="(node, index) in crud" v-bind:key="index" :nodes="node" :label="index" :contentToLoad="loadCrud" :depth="1"></tree-menu>
     </div>
 </template>
 

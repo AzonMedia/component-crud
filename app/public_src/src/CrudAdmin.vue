@@ -57,7 +57,7 @@
                     <template v-if="!actionState">
                         <p>{{actionTitle}}</p>
 
-                        <b-form-group class="form-group" v-for="(value, index) in putValues" v-if="index!='meta_object_uuid'" :label="index" label-align="right" label-cols="3">
+                        <b-form-group class="form-group" v-for="(value, index) in putValues" v-if="index!='meta_object_uuid'" v-bind:key="index" :label="index" label-align="right" label-cols="3">
 
                             <template v-if="action=='delete'">
                                 <b-form-input :value="value" disabled></b-form-input>

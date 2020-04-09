@@ -56,9 +56,10 @@ class Crud extends BaseController
      * @param string $class_name
      * @param int $page
      * @param int $limit
-     * @param string $search_values: url encoded, base64 encoded, JSON.stringified array
-     * @param string $sort_by: column name
-     * @param string $sort_desc: "true" / "false"; if true => sort DESC
+     * @param string $search_values : url encoded, base64 encoded, JSON.stringified array
+     * @param string $sort_by : column name
+     * @param string $sort_desc : "true" / "false"; if true => sort DESC
+     * @return ResponseInterface
      */
     public function objects(string $class_name, int $page, int $limit, string $search_values, string $sort_by, string $sort_desc): ResponseInterface
     {

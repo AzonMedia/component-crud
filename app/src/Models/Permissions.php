@@ -27,6 +27,12 @@ class Permissions extends Base
 
     protected const CONFIG_RUNTIME = [];
 
+    /**
+     * Returns the tree of the classes as needed by the navigation hook.
+     * @return array
+     * @throws \Guzaba2\Base\Exceptions\InvalidArgumentException
+     * @throws \ReflectionException
+     */
     public static function get_tree()
     {
         // get all ActiveRecord classes that are loaded by the Kernel
@@ -109,54 +115,6 @@ class Permissions extends Base
         }
         return $return_arr;
     }
-
-//    /**
-//     * Returns the permissions of the controllers.
-//     * @param string $class_name
-//     * @param string $action_name
-//     * @return mixed
-//     * @throws \Guzaba2\Base\Exceptions\RunTimeException
-//     */
-//    public static function get_permissions(string $class_name, string $action_name)
-//    {
-//        $Connection = self::get_service('ConnectionFactory')->get_connection(MysqlConnectionCoroutine::class, $ScopeReference);
-//
-//        $q = "
-//SELECT
-//    roles.*,
-//    meta.meta_object_uuid,
-//    CASE WHEN roles.role_id = acl_permissions.role_id THEN 1 ELSE 0 END as granted,
-//    CASE WHEN roles.role_id = acl_permissions.role_id THEN 'success' ELSE '' END as _rowVariant
-//FROM
-//    {$Connection::get_tprefix()}roles as roles
-//LEFT JOIN
-//    {$Connection::get_tprefix()}acl_permissions as acl_permissions
-//    ON
-//        roles.role_id = acl_permissions.role_id
-//    AND
-//        acl_permissions.class_name = :class_name
-//    AND
-//        acl_permissions.action_name = :action_name
-//    AND
-//		(acl_permissions.object_id IS NULL OR acl_permissions.object_id = 0)
-//LEFT JOIN
-//    {$Connection::get_tprefix()}users as users
-//    ON
-//        roles.role_id = users.user_id
-//LEFT JOIN
-//    {$Connection::get_tprefix()}object_meta as meta
-//    ON
-//        meta.meta_object_id = acl_permissions.permission_id
-//WHERE
-//	(users.user_id IS NULL OR users.user_id = 1)
-//
-//ORDER BY
-//    roles.role_name
-//";
-//
-//        $data = $Connection->prepare($q)->execute(['class_name' => $class_name, 'action_name' => $action_name])->fetchAll();
-//        return $data;
-//    }
 
     /**
      * Returns the permissions of a specific object.
