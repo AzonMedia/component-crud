@@ -489,8 +489,15 @@
             },
 
             showPermissions(row) {
-                console.log(row);
-                this.title_permissions = "Permissions for object of class \"" + row.meta_class_name + "\" with id: " + row.meta_object_id + ", object_uuid: " + row.meta_object_uuid;
+
+
+                if (row.meta_object_id) {
+                    this.title_permissions = "Permissions for object of class \"" + row.meta_class_name + "\" with id: " + row.meta_object_id + ", object_uuid: " + row.meta_object_uuid;
+                } else {
+                    this.title_permissions = "Permissions for object of class \"" + row.meta_class_name + "\" with object_uuid: " + row.meta_object_uuid;
+                }
+                //
+                //
                 this.selectedObject = row;
                 var self = this;
                 this.$http.get('/admin/permissions-objects/' + this.selectedClassName.split('\\').join('-') + '/' + row.meta_object_uuid)
@@ -519,7 +526,7 @@
             togglePermission(row, action, checked){
                 this.isBusy_permission = true;
 
-                let sendValues = {}
+                let SendValues = {}
 
                 if (checked) {
                 //if (typeof row.permissions[action] != "undefined") {
@@ -528,16 +535,20 @@
 
                     this.action = "delete";
 
-                    var url = 'acl-permissions/' + object_uuid;
+                    var url = 'acl-permission/' + object_uuid;
                 } else {
                     this.action = "post";
 
-                    var url = 'acl-permissions';
+                    var url = 'acl-permission';
 
-                    sendValues.role_id = row.role_id;
-                    sendValues.object_id = this.selectedObject.meta_object_id;
-                    sendValues.action_name = action;
-                    sendValues.class_name = this.selectedClassName.split(".").join("\\");
+                    SendValues.role_id = row.role_id;
+                    if (this.selectedObject.meta_object_id) {
+                        SendValues.object_id = this.selectedObject.meta_object_id;
+                    } else {
+                        SendValues.object_uuid = this.selectedObject.meta_object_uuid;
+                    }
+                    SendValues.action_name = action;
+                    SendValues.class_name = this.selectedClassName.split(".").join("\\");
                 }
 
 
@@ -547,7 +558,7 @@
                     method: this.action,
                     url: url,
                     //data: this.$stringify(sendValues)
-                    data: sendValues
+                    data: SendValues
                 })
                     .then(resp => {
                         this.$bvToast.toast(resp.data.message, {
@@ -646,7 +657,7 @@
     }
 
     #data {
-        width: 65%;
+        width: 100%;
         font-size: 10pt;
     }
 
