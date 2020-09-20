@@ -161,7 +161,7 @@
         data() {
             return {
                 checkbox_test: '0',
-                limit: 10,
+                limit: 100,
                 currentPage: 1,
                 totalItems: 0,
 
