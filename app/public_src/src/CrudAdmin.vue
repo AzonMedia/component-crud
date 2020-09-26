@@ -583,10 +583,10 @@
                         //self.requestError = err;
 
                     })
-                .finally(function(){
-                    self.showPermissions(self.selectedObject)
-                    self.isBusy_permission = false;
-                });
+                    .finally(function(){
+                        self.showPermissions(self.selectedObject)
+                        self.isBusy_permission = false;
+                    });
             },
 
             sortingChanged(ctx) {
@@ -611,9 +611,11 @@
                 }
             },
             $route (to, from) { // needed because by default no class is loaded and when it is loaded the component for the two routes is the same.
-                this.selectedClassName = this.$route.params.class.split('-').join('\\');
-                //console.log("ASD " + this.selectedClassName)
-                this.getClassObjects(this.selectedClassName);
+                if (typeof this.$route.params.class !== 'undefined') {
+                    this.selectedClassName = this.$route.params.class.split('-').join('\\');
+                    //console.log("ASD " + this.selectedClassName)
+                    this.getClassObjects(this.selectedClassName);
+                }
 
             }
         },
@@ -665,9 +667,9 @@
         cursor: pointer;
     }
 
-    .btn {
-        width: 100%;
-    }
+    /*.btn {*/
+    /*    width: 100%;*/
+    /*}*/
 
     tr:hover{
         background-color: #ddd !important;
