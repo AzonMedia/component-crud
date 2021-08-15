@@ -1,5 +1,5 @@
 <template>
-    <div class="crud">
+    <div class="crud" style="margin-bottom: 10px">
         <div class="content">
             <div id="data" class="tab">
                 <h3 v-if="selectedClassName!=''">Class "{{selectedClassName}}" crud operations <b-button variant="success" @click="showModal('post', newObject)" size="sm">Create New</b-button> </h3>
@@ -96,7 +96,7 @@
                         body-bg-variant="light"
                         body-text-variant="dark"
                         hide-footer
-                        size="lg"
+                        size="xl"
                 >
                     <b-table
                             striped
@@ -496,8 +496,7 @@
                 } else {
                     this.title_permissions = "Permissions for object of class \"" + row.meta_class_name + "\" with object_uuid: " + row.meta_object_uuid;
                 }
-                //
-                //
+
                 this.selectedObject = row;
                 var self = this;
                 this.$http.get('/admin/permissions-objects/' + this.selectedClassName.split('\\').join('-') + '/' + row.meta_object_uuid)
@@ -508,7 +507,8 @@
                         for (let action_name in self.items_permissions[0].permissions) {
                             self.fields_permissions.push({
                                 key: action_name,
-                                label: action_name,
+                                //label: action_name,
+                                label: this.$options.filters.humanize(action_name),
                                 sortable: true,
                             });
                         }
@@ -517,7 +517,7 @@
                         console.log(err);
                         self.requestError = err;
                         self.items_permissions = [];
-                    }).finally(function(){
+                    }).finally(function() {
                         self.$bvModal.show('crud-permissions');
                     });
 
@@ -682,4 +682,5 @@
     tr {
         cursor: pointer;
     }
+
 </style>
